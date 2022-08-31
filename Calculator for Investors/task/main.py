@@ -38,16 +38,18 @@ Enter cash equivalents (in the format '987654321'):
 Enter liabilities (in the format '987654321'):'''
 
 def do_top10_menu():
-    while True:
-        print(TOP_TEN_MENU)
-        cmd = input('Enter an option:\n')
-        if cmd == '0':
-            break
-        elif cmd in '123':
-            print('Not implemented!')
-            break
-        else:
-            print('Invalid option!')
+    print(TOP_TEN_MENU)
+    cmd = input('Enter an option:\n')
+    if cmd == '0':
+        pass
+    elif cmd == '1':
+        list_top10('ND/EBITDA')
+    elif cmd == '2':
+        list_top10('ROE')
+    elif cmd == '3':
+        list_top10('ROA')
+    else:
+        print('Invalid option!')
 
 def do_crud_menu():
     while True:
@@ -240,6 +242,25 @@ def list_all():
         for w in c:
             s += w + ' '
         print(s.strip())
+
+def list_top10(param):
+    print(f'TICKER {param}')
+    if param == 'ND/EBITDA':
+        p1 = 'round(net_debt/ebitda, 2)'
+        p2 = 'net_debt AND ebitda'
+    elif param == 'ROE':
+        p1 = 'round(net_profit/equity, 2)'
+        p2 = 'net_profit AND equity'
+    else:
+        p1 = 'round(net_profit/assets, 2)'
+        p2 = 'net_profit AND assets'
+    sql = f'''SELECT ticker, {p1} as exp FROM financial
+                WHERE {p2} NOT NULL
+                ORDER by -exp'''
+    cur = conn.cursor()
+    cur.execute(sql)
+    for c in cur.fetchmany(10):
+        print(c[0], c[1])
 
 def create_db():
     # if os.path.exists('investor.db'):
